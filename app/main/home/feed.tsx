@@ -164,8 +164,23 @@ const FeedbackDisplay = ({ recognizedText, sentenceRef }) => {
       setFeedback(response.data.feedback.join("\n"));
       setMatch(response.data.match);
       setScore(response.data.score); // Mettre à jour le score
+      await saveScoreToSupabase(Math.floor(response.data.score / 10), response.data.feedback.length); // Envoyer le score et la longueur de la phrase à Supabase
     } catch (error) {
       console.error("Error comparing text:", error);
+    }
+  };
+
+  const saveScoreToSupabase = async (score, sentenceLength) => {
+    try {
+      const user = JSON.parse(await AsyncStorage.getItem("user"));
+      const userId = user.userId;
+      const { data, error } = await supabase
+        .from("user_scores")
+        .insert([{ user_id: userId, score, sentence_length: sentenceLength }]);
+      if (error) throw error;
+      console.log("Score and sentence length saved to Supabase:", data);
+    } catch (error) {
+      console.error("Error saving score and sentence length to Supabase:", error);
     }
   };
 
