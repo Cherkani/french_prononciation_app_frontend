@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState, useCallback } from "react";
-import { Pressable, StyleSheet, Text, View, Alert, TouchableOpacity } from "react-native";
+import { Pressable, StyleSheet, Text, View, Alert, TouchableOpacity, ImageBackground, Image } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TextInput } from "react-native-gesture-handler";
 import { useAuth } from "../../context/auth";
@@ -59,39 +59,48 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.textInput}
-        value={email}
-        placeholder="Type email"
-        onChangeText={(text) => setEmail(text)}
-      />
-      <TextInput
-        style={styles.textInput}
-        value={password}
-        onChangeText={(text) => setPassword(text)}
-        placeholder="Type password"
-        secureTextEntry
-      />
-      <View style={styles.separator} />
-      <Pressable onPress={onSignInTapped} style={[styles.button, styles.loginButton]}>
-        <Text style={styles.text}>Login</Text>
-      </Pressable>
-      <Pressable onPress={() => router.push("/register")} style={[styles.button, styles.registerButton]}>
-        <Text style={styles.text}>Register</Text>
-      </Pressable>
+    <ImageBackground
+      source={{
+        uri: "https://marketplace.canva.com/EAF6DEqEaro/1/0/900w/canva-orange-white-cartoon-illustrative-funny-cat-phone-wallpaper-W05PU8BDltw.jpg",
+      }}
+      style={styles.background}
+      imageStyle={{ opacity: 0.3 }}
+    >
+      <View style={styles.container}>
+        <Image source={require("../../assets/cat1.png")} style={styles.image} />
+        <TextInput
+          style={styles.textInput}
+          value={email}
+          placeholder="Type email"
+          onChangeText={(text) => setEmail(text)}
+        />
+        <TextInput
+          style={styles.textInput}
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+          placeholder="Type password"
+          secureTextEntry
+        />
+        <View style={styles.separator} />
+        <Pressable onPress={onSignInTapped} style={[styles.button, styles.loginButton]}>
+          <Text style={styles.text}>Login</Text>
+        </Pressable>
+        <Pressable onPress={() => router.push("/register")} style={[styles.button, styles.registerButton]}>
+          <Text style={styles.text}>Register</Text>
+        </Pressable>
 
-      <FancyAlert
-        visible={visible}
-        icon={<View style={styles.icon}><Text>🤓</Text></View>}
-        style={{ backgroundColor: 'white' }}
-      >
-        <Text style={{ marginTop: -16, marginBottom: 32 }}>{alertMessage}</Text>
-        <TouchableOpacity style={styles.btn} onPress={toggleAlert}>
-          <Text style={styles.btnText}>OK</Text>
-        </TouchableOpacity>
-      </FancyAlert>
-    </View>
+        <FancyAlert
+          visible={visible}
+          icon={<View style={styles.icon}><Text>🤓</Text></View>}
+          style={{ backgroundColor: 'white' }}
+        >
+          <Text style={{ marginTop: -16, marginBottom: 32 }}>{alertMessage}</Text>
+          <TouchableOpacity style={styles.btn} onPress={toggleAlert}>
+            <Text style={styles.btnText}>OK</Text>
+          </TouchableOpacity>
+        </FancyAlert>
+      </View>
+    </ImageBackground>
   );
 }
 
@@ -156,5 +165,15 @@ const styles = StyleSheet.create({
   },
   btnText: {
     color: '#FFFFFF',
+  },
+  background: {
+    flex: 1,
+    resizeMode: "cover",
+  },
+  image: {
+    width: 140,
+    height: 140,
+    borderRadius: 60,
+    marginBottom: 20,
   },
 });

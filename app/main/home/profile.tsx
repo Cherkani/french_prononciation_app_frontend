@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Button, Pressable, StyleSheet, Text, View, TextInput, TouchableOpacity } from "react-native";
+import { Button, Pressable, StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, Image } from "react-native";
 import { useAuth } from "../../../context/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -60,51 +60,60 @@ export default function Profile() {
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.textInput}
-        value={fullname}
-        placeholder="Full Name"
-        onChangeText={(text) => setFullname(text)}
-      />
-      <TextInput
-        style={styles.textInput}
-        value={login}
-        placeholder="Login"
-        onChangeText={(text) => setLogin(text)}
-      />
-      <TextInput
-        style={styles.textInput}
-        value={city}
-        placeholder="City"
-        onChangeText={(text) => setCity(text)}
-      />
-      <TextInput
-        style={styles.textInput}
-        value={password}
-        placeholder="Password"
-        secureTextEntry
-        onChangeText={(text) => setPassword(text)}
-      />
-      <View style={styles.separator} />
-      <Pressable onPress={handleUpdate} style={[styles.button, styles.updateButton]}>
-        <Text style={styles.text}>Update Profile</Text>
-      </Pressable>
-      <Pressable onPress={onLogOut} style={[styles.button, styles.logoutButton]}>
-        <Text style={{ color: "white" }}>Log Out</Text>
-      </Pressable>
+    <ImageBackground
+      source={{
+        uri: "https://marketplace.canva.com/EAF6DEqEaro/1/0/900w/canva-orange-white-cartoon-illustrative-funny-cat-phone-wallpaper-W05PU8BDltw.jpg",
+      }}
+      style={styles.background}
+      imageStyle={{ opacity: 0.3 }}
+    >
+      <View style={styles.container}>
+        <Image source={require("../../../assets/cat1.png")} style={styles.image} />
+        <TextInput
+          style={styles.textInput}
+          value={fullname}
+          placeholder="Full Name"
+          onChangeText={(text) => setFullname(text)}
+        />
+        <TextInput
+          style={styles.textInput}
+          value={login}
+          placeholder="Login"
+          onChangeText={(text) => setLogin(text)}
+        />
+        <TextInput
+          style={styles.textInput}
+          value={city}
+          placeholder="City"
+          onChangeText={(text) => setCity(text)}
+        />
+        <TextInput
+          style={styles.textInput}
+          value={password}
+          placeholder="Password"
+          secureTextEntry
+          onChangeText={(text) => setPassword(text)}
+        />
+        <View style={styles.separator} />
+        <Pressable onPress={handleUpdate} style={[styles.button, styles.updateButton]}>
+          <Text style={styles.text}>Update Profile</Text>
+        </Pressable>
+        <Pressable onPress={onLogOut} style={[styles.button, styles.logoutButton]}>
+          <Text style={{ color: "white" }}>Log Out</Text>
+        </Pressable>
 
-      <FancyAlert
-        visible={visible}
-        icon={<View style={styles.icon}><Text>🤓</Text></View>}
-        style={{ backgroundColor: 'white' }}
-      >
-        <Text style={{ marginTop: -16, marginBottom: 32 }}>{alertMessage}</Text>
-        <TouchableOpacity style={styles.btn} onPress={toggleAlert}>
-          <Text style={styles.btnText}>OK</Text>
-        </TouchableOpacity>
-      </FancyAlert>
-    </View>
+        <FancyAlert
+          visible={visible}
+          icon={<View style={styles.icon}><Text>🤓</Text></View>}
+          style={{ backgroundColor: 'white' }}
+        >
+          <Text style={{ marginTop: -16, marginBottom: 32 }}>{alertMessage}</Text>
+          <TouchableOpacity style={styles.btn} onPress={toggleAlert}>
+            <Text style={styles.btnText}>OK</Text>
+          </TouchableOpacity>
+        </FancyAlert>
+      </View>
+    </ImageBackground>
   );
 }
 
@@ -169,5 +178,15 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     backgroundColor: "#ff8c00",
+  },
+  background: {
+    flex: 1,
+    resizeMode: "cover",
+  },
+  image: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    marginBottom: 20,
   },
 });

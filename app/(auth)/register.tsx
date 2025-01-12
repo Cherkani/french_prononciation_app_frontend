@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { StyleSheet, Text, View, TextInput, Pressable, Alert, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TextInput, Pressable, Alert, TouchableOpacity, ImageBackground, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { supabase } from "../lib/supabase";
 import { FancyAlert } from 'react-native-expo-fancy-alerts';
@@ -32,51 +32,60 @@ const RegisterScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.textInput}
-        value={fullname}
-        placeholder="Full Name"
-        onChangeText={(text) => setFullname(text)}
-      />
-      <TextInput
-        style={styles.textInput}
-        value={login}
-        placeholder="Login"
-        onChangeText={(text) => setLogin(text)}
-      />
-      <TextInput
-        style={styles.textInput}
-        value={password}
-        placeholder="Password"
-        secureTextEntry
-        onChangeText={(text) => setPassword(text)}
-      />
-      <TextInput
-        style={styles.textInput}
-        value={city}
-        placeholder="City"
-        onChangeText={(text) => setCity(text)}
-      />
-      <View style={styles.separator} />
-      <Pressable onPress={handleSubmit} style={[styles.button, styles.registerButton]}>
-        <Text style={styles.text}>Register</Text>
-      </Pressable>
-      <Pressable onPress={() => router.push("/login")} style={[styles.button, styles.backButton]}>
-        <Text style={styles.text}>Back to Login</Text>
-      </Pressable>
+    <ImageBackground
+      source={{
+        uri: "https://marketplace.canva.com/EAF6DEqEaro/1/0/900w/canva-orange-white-cartoon-illustrative-funny-cat-phone-wallpaper-W05PU8BDltw.jpg",
+      }}
+      style={styles.background}
+      imageStyle={{ opacity: 0.3 }}
+    >
+      <View style={styles.container}>
+        <Image source={require("../../assets/cat1.png")} style={styles.image} />
+        <TextInput
+          style={styles.textInput}
+          value={fullname}
+          placeholder="Full Name"
+          onChangeText={(text) => setFullname(text)}
+        />
+        <TextInput
+          style={styles.textInput}
+          value={login}
+          placeholder="Login"
+          onChangeText={(text) => setLogin(text)}
+        />
+        <TextInput
+          style={styles.textInput}
+          value={password}
+          placeholder="Password"
+          secureTextEntry
+          onChangeText={(text) => setPassword(text)}
+        />
+        <TextInput
+          style={styles.textInput}
+          value={city}
+          placeholder="City"
+          onChangeText={(text) => setCity(text)}
+        />
+        <View style={styles.separator} />
+        <Pressable onPress={handleSubmit} style={[styles.button, styles.registerButton]}>
+          <Text style={styles.text}>Register</Text>
+        </Pressable>
+        <Pressable onPress={() => router.push("/login")} style={[styles.button, styles.backButton]}>
+          <Text style={styles.text}>Back to Login</Text>
+        </Pressable>
 
-      <FancyAlert
-        visible={visible}
-        icon={<View style={styles.icon}><Text>🤓</Text></View>}
-        style={{ backgroundColor: 'white' }}
-      >
-        <Text style={{ marginTop: -16, marginBottom: 32 }}>{alertMessage}</Text>
-        <TouchableOpacity style={styles.btn} onPress={toggleAlert}>
-          <Text style={styles.btnText}>OK</Text>
-        </TouchableOpacity>
-      </FancyAlert>
-    </View>
+        <FancyAlert
+          visible={visible}
+          icon={<View style={styles.icon}><Text>🤓</Text></View>}
+          style={{ backgroundColor: 'white' }}
+        >
+          <Text style={{ marginTop: -16, marginBottom: 32 }}>{alertMessage}</Text>
+          <TouchableOpacity style={styles.btn} onPress={toggleAlert}>
+            <Text style={styles.btnText}>OK</Text>
+          </TouchableOpacity>
+        </FancyAlert>
+      </View>
+    </ImageBackground>
   );
 };
 
@@ -105,7 +114,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     width: "60%",
-    backgroundColor: "#05BFDB",
+    backgroundColor: "#ff8c00", // Changer la couleur ici
     marginTop: 8,
     borderRadius: 32,
     alignItems: "center",
@@ -141,6 +150,16 @@ const styles = StyleSheet.create({
   },
   btnText: {
     color: '#FFFFFF',
+  },
+  background: {
+    flex: 1,
+    resizeMode: "cover",
+  },
+  image: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    marginBottom: 20,
   },
 });
 

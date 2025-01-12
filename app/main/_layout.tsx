@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
 import { Drawer } from "expo-router/drawer";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, ImageBackground } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../../context/auth";
 
@@ -22,20 +22,28 @@ const CustomDrawerContent = (props) => {
   }, []);
 
   return (
-    <DrawerContentScrollView {...props}>
-      <View style={styles.userInfoContainer}>
-        <Image source={require("../../assets/cat1.png")} style={styles.image} />
-        <Text style={styles.userInfoText}>Full Name: {fullname}</Text>
-        <Text style={styles.userInfoText}>Login: {login}</Text>
-      </View>
-      <DrawerItemList {...props} />
-      <DrawerItem
-        label="Log Out"
-        onPress={onLogOut}
-        style={[styles.button, styles.logoutButton]}
-        labelStyle={styles.buttonText}
-      />
-    </DrawerContentScrollView>
+    <ImageBackground
+      source={{
+        uri: "https://marketplace.canva.com/EAF6DEqEaro/1/0/900w/canva-orange-white-cartoon-illustrative-funny-cat-phone-wallpaper-W05PU8BDltw.jpg",
+      }}
+      style={styles.background}
+      imageStyle={{ opacity: 0.3 }}
+    >
+      <DrawerContentScrollView {...props}>
+        <View style={styles.userInfoContainer}>
+          <Image source={require("../../assets/cat1.png")} style={styles.image} />
+          <Text style={styles.userInfoText}>Full Name: {fullname}</Text>
+          <Text style={styles.userInfoText}>Login: {login}</Text>
+        </View>
+        <DrawerItemList {...props} />
+        <DrawerItem
+          label="Log Out"
+          onPress={onLogOut}
+          style={[styles.button, styles.logoutButton]}
+          labelStyle={styles.buttonText}
+        />
+      </DrawerContentScrollView>
+    </ImageBackground>
   );
 };
 
@@ -48,20 +56,28 @@ export default function MainLayout() {
   };
 
   return (
-    <Drawer
-      screenOptions={{
-        drawerPosition: "left",
+    <ImageBackground
+      source={{
+        uri: "https://marketplace.canva.com/EAF6DEqEaro/1/0/900w/canva-orange-white-cartoon-illustrative-funny-cat-phone-wallpaper-W05PU8BDltw.jpg",
       }}
-      drawerContent={(props) => <CustomDrawerContent {...props} onLogOut={onLogOut} />}
+      style={styles.background}
+      imageStyle={{ opacity: 0.3 }}
     >
-      <Drawer.Screen 
-        name="home" 
-        options={{
-          title: "Accueil",
-          drawerLabel: "Accueil"
+      <Drawer
+        screenOptions={{
+          drawerPosition: "left",
         }}
-      />
-    </Drawer>
+        drawerContent={(props) => <CustomDrawerContent {...props} onLogOut={onLogOut} />}
+      >
+        <Drawer.Screen 
+          name="home" 
+          options={{
+            title: "Accueil",
+            drawerLabel: "Accueil"
+          }}
+        />
+      </Drawer>
+    </ImageBackground>
   );
 }
 
@@ -94,5 +110,9 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     backgroundColor: "#ff8c00",
+  },
+  background: {
+    flex: 1,
+    resizeMode: "cover",
   },
 });
