@@ -18,8 +18,17 @@ const SentenceDisplay = ({ sentence, getSentence, readSentence, sentenceRef }) =
     <Text ref={sentenceRef} style={styles.sentence}>
       {sentence || 'Cliquez sur "Obtenir une phrase" pour commencer'}
     </Text>
-    <Button title="Obtenir une phrase" onPress={getSentence} />
-    <Button title="Écouter la phrase" onPress={readSentence} />
+    <View style={styles.buttonContainer}>
+    <TouchableOpacity style={styles.iconButton} onPress={readSentence}>
+        <Icon name="volume-up" size={20} color="#FFFAF0" />
+        <Text style={styles.buttonText}>Écouter la phrase</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.iconButton} onPress={getSentence}>
+        <Icon name="arrow-right" size={20} color="#FFFAF0" />
+        <Text style={styles.buttonText}>Obtenir une phrase</Text>
+      </TouchableOpacity>
+      
+    </View>
   </View>
 );
 
@@ -128,11 +137,10 @@ const RecordButton = ({ onRecognizedText, sentenceRef }) => {
           <Icon name="microphone-alt" size={80} color="#FFFAF0" />
         </Animated.View>
       </TouchableOpacity>
-      <Button
-        title="Réécouter l'enregistrement"
-        onPress={playAudio}
-        disabled={!audioURL}
-      />
+      <TouchableOpacity style={styles.iconButton} onPress={playAudio} disabled={!audioURL}>
+        <Icon name="play" size={20} color="#FFFAF0" />
+        <Text style={styles.buttonText}>Réécouter l'enregistrement</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -354,6 +362,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "purple",
     marginTop: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
+  iconButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FF8C00",
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: "#FFFAF0",
+    marginLeft: 5,
   },
 });
 
