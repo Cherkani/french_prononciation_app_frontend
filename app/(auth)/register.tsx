@@ -59,10 +59,10 @@ const RegisterScreen: React.FC = () => {
         onChangeText={(text) => setCity(text)}
       />
       <View style={styles.separator} />
-      <Pressable onPress={handleSubmit} style={styles.button}>
+      <Pressable onPress={handleSubmit} style={[styles.button, styles.registerButton]}>
         <Text style={styles.text}>Register</Text>
       </Pressable>
-      <Pressable onPress={() => router.push("/login")} style={styles.button}>
+      <Pressable onPress={() => router.push("/login")} style={[styles.button, styles.backButton]}>
         <Text style={styles.text}>Back to Login</Text>
       </Pressable>
 
@@ -109,6 +109,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
     borderRadius: 32,
     alignItems: "center",
+  },
+  registerButton: {
+    backgroundColor: "#ff8c00",
+  },
+  backButton: {
+    backgroundColor: "#ff8c00",
   },
   icon: {
     flex: 1,

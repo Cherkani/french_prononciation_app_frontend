@@ -22,7 +22,7 @@ export default function Profile() {
       if (user) {
         setFullname(user.fullname);
         setLogin(user.login);
-        setCity(user.city);
+        setCity(user.city); // Assurez-vous que la ville est récupérée
       }
     };
     fetchUserData();
@@ -87,10 +87,10 @@ export default function Profile() {
         onChangeText={(text) => setPassword(text)}
       />
       <View style={styles.separator} />
-      <Pressable onPress={handleUpdate} style={styles.button}>
+      <Pressable onPress={handleUpdate} style={[styles.button, styles.updateButton]}>
         <Text style={styles.text}>Update Profile</Text>
       </Pressable>
-      <Pressable onPress={onLogOut} style={styles.button}>
+      <Pressable onPress={onLogOut} style={[styles.button, styles.logoutButton]}>
         <Text style={{ color: "white" }}>Log Out</Text>
       </Pressable>
 
@@ -163,5 +163,11 @@ const styles = StyleSheet.create({
   },
   btnText: {
     color: '#FFFFFF',
+  },
+  updateButton: {
+    backgroundColor: "#ff8c00",
+  },
+  logoutButton: {
+    backgroundColor: "#ff8c00",
   },
 });

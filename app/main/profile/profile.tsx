@@ -1,34 +1,62 @@
-import React, { useState, useCallback } from "react";
-import { StyleSheet, Text, View, TextInput, Pressable, Alert, TouchableOpacity } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { Button, Pressable, StyleSheet, Text, View, TextInput, TouchableOpacity } from "react-native";
+import { useAuth } from "../../../context/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { supabase } from "../../lib/supabase";
 import { FancyAlert } from 'react-native-expo-fancy-alerts';
 
-const RegisterScreen: React.FC = () => {
+export default function Profile() {
+  const { signOut } = useAuth();
   const router = useRouter();
   const [fullname, setFullname] = useState("");
   const [login, setLogin] = useState("");
-  const [password, setPassword] = useState("");
   const [city, setCity] = useState("");
+  const [password, setPassword] = useState(""); // Ajouter l'état du mot de passe
   const [visible, setVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = JSON.parse(await AsyncStorage.getItem("user"));
+      if (user) {
+        setFullname(user.fullname);
+        setLogin(user.login);
+        setCity(user.city); // Assurez-vous que la ville est récupérée
+      }
+    };
+    fetchUserData();
+  }, []);
 
   const toggleAlert = useCallback(() => {
     setVisible(!visible);
   }, [visible]);
 
-  const handleSubmit = async () => {
-    const user = { fullname, login, password, city };
-    const { data, error } = await supabase.from("users").insert([user]);
+  const handleUpdate = async () => {
+    const user = JSON.parse(await AsyncStorage.getItem("user"));
+    const updates = { fullname, login, city };
+    if (password) {
+      updates.password = password; // Ajouter le mot de passe aux mises à jour si fourni
+    }
+    const { data, error } = await supabase
+      .from("users")
+      .update(updates)
+      .eq("id", user.userId);
 
     if (error) {
-      console.error("Error inserting data:", error);
-      setAlertMessage("Failed to register. Please try again.");
+      console.error("Error updating data:", error.message); // Afficher le message d'erreur
+      setAlertMessage(`Failed to update profile. Error: ${error.message}`);
     } else {
-      console.log("Data inserted successfully:", data);
-      setAlertMessage("Registration successful!");
+      console.log("Data updated successfully:", data);
+      setAlertMessage("Profile updated successfully!");
+      await AsyncStorage.setItem("user", JSON.stringify({ ...user, fullname, login, city }));
     }
     toggleAlert();
+  };
+
+  const onLogOut = async () => {
+    await AsyncStorage.removeItem("user");
+    signOut();
   };
 
   return (
@@ -47,23 +75,23 @@ const RegisterScreen: React.FC = () => {
       />
       <TextInput
         style={styles.textInput}
+        value={city}
+        placeholder="City"
+        onChangeText={(text) => setCity(text)}
+      />
+      <TextInput
+        style={styles.textInput}
         value={password}
         placeholder="Password"
         secureTextEntry
         onChangeText={(text) => setPassword(text)}
       />
-      <TextInput
-        style={styles.textInput}
-        value={city}
-        placeholder="City"
-        onChangeText={(text) => setCity(text)}
-      />
       <View style={styles.separator} />
-      <Pressable onPress={handleSubmit} style={styles.button}>
-        <Text style={styles.text}>Register</Text>
+      <Pressable onPress={handleUpdate} style={[styles.button, { backgroundColor: "#ff8c00" }]}>
+        <Text style={styles.text}>Update Profile</Text>
       </Pressable>
-      <Pressable onPress={() => router.push("/login")} style={styles.button}>
-        <Text style={styles.text}>Back to Login</Text>
+      <Pressable onPress={onLogOut} style={[styles.button, { backgroundColor: "#ff8c00" }]}>
+        <Text style={{ color: "white" }}>Log Out</Text>
       </Pressable>
 
       <FancyAlert
@@ -78,7 +106,7 @@ const RegisterScreen: React.FC = () => {
       </FancyAlert>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -137,5 +165,3 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 });
-
-export default RegisterScreen;

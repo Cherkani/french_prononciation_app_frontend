@@ -9,23 +9,6 @@ export default function HomeLayout() {
       }}
     >
       <Tabs.Screen
-        name="feed"
-        options={{
-          tabBarIcon: ({ color }) => (
-            <FontAwesome name="home" size={24} color={color} />
-          ),
-        }}
-      />
-      
-      <Tabs.Screen
-        name="notification"
-        options={{
-          tabBarIcon: ({ color }) => (
-            <FontAwesome name="bell" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="profile"
         options={{
           tabBarIcon: ({ color }) => (
@@ -33,6 +16,7 @@ export default function HomeLayout() {
           ),
         }}
       />
+     
     </Tabs>
   );
 }

@@ -25,7 +25,7 @@ export default function Login() {
       setLoading(true);
       const { data, error } = await supabase
         .from("users")
-        .select("id, password")
+        .select("id, password, login, fullname, city")
         .eq("login", email)
         .single();
 
@@ -44,8 +44,8 @@ export default function Login() {
       }
 
       console.log("Login and password are correct");
-      await AsyncStorage.setItem("user", JSON.stringify({ email, password, userId: data.id }));
-      signIn({ email, password, userId: data.id });
+      await AsyncStorage.setItem("user", JSON.stringify({ email, password, userId: data.id, login: data.login, fullname: data.fullname, city: data.city }));
+      signIn({ email, password, userId: data.id, login: data.login, fullname: data.fullname, city: data.city });
       setAlertMessage("Login successful!");
       toggleAlert();
       router.push("/home"); // Assurez-vous que la navigation se fait ici
@@ -74,10 +74,10 @@ export default function Login() {
         secureTextEntry
       />
       <View style={styles.separator} />
-      <Pressable onPress={onSignInTapped} style={styles.button}>
+      <Pressable onPress={onSignInTapped} style={[styles.button, styles.loginButton]}>
         <Text style={styles.text}>Login</Text>
       </Pressable>
-      <Pressable onPress={() => router.push("/register")} style={styles.button}>
+      <Pressable onPress={() => router.push("/register")} style={[styles.button, styles.registerButton]}>
         <Text style={styles.text}>Register</Text>
       </Pressable>
 
@@ -120,10 +120,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     width: "60%",
-    backgroundColor: "#05BFDB",
+    backgroundColor: "#ff8c00", // Changer la couleur ici
     marginTop: 8,
     borderRadius: 32,
     alignItems: "center",
+  },
+  loginButton: {
+    backgroundColor: "#ff8c00",
+  },
+  registerButton: {
+    backgroundColor: "#ff8c00",
   },
   icon: {
     flex: 1,
