@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import axios from "axios";
+import { supabase } from "../../lib/supabase"; // Corriger le chemin de l'importation
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Importer AsyncStorage
 
 const SentenceDisplay = ({ sentence, getSentence, readSentence }) => (
   <View style={styles.sentenceContainer}>
@@ -132,7 +134,36 @@ const RecordButton = ({ onRecognizedText }) => {
   );
 };
 
-const FeedbackDisplay = ({ recognizedText }) => {
+const saveScore = async (score, sentenceLength) => {
+  try {
+    const user = JSON.parse(await AsyncStorage.getItem("user"));
+    const userId = user.userId;
+    const { error } = await supabase
+      .from("user_scores")
+      .insert([{ user_id: userId, score: score, sentence_length: sentenceLength }]);
+    if (error) throw error;
+  } catch (error) {
+    console.error("Error saving score:", error);
+  }
+};
+
+const getTotalScore = async () => {
+  try {
+    const user = JSON.parse(await AsyncStorage.getItem("user"));
+    const userId = user.userId;
+    const { data, error } = await supabase
+      .from("user_scores")
+      .select("score")
+      .eq("user_id", userId);
+    if (error) throw error;
+    const totalScore = data.reduce((acc, curr) => acc + curr.score, 0);
+    return totalScore;
+  } catch (error) {
+    console.error("Error fetching total score:", error);
+  }
+};
+
+const FeedbackDisplay = ({ recognizedText, totalScore }) => {
   const [feedback, setFeedback] = useState([]);
   const [match, setMatch] = useState(false);
   const [score, setScore] = useState(0);
@@ -162,6 +193,7 @@ const FeedbackDisplay = ({ recognizedText }) => {
       setFeedback(feedbackArray);
       setMatch(response.data.match);
       calculateScore(feedbackArray);
+      await saveScore(score, document.getElementById("sentence").innerText.length);
     } catch (error) {
       console.error("Error comparing text:", error);
     }
@@ -192,6 +224,7 @@ const FeedbackDisplay = ({ recognizedText }) => {
         ))}
       </Text>
       <Text style={styles.scoreText}>Score: {score}</Text>
+      <Text style={styles.totalScoreText}>Total Score: {totalScore}</Text> {/* Afficher le score total */}
     </View>
   );
 };
@@ -199,6 +232,7 @@ const FeedbackDisplay = ({ recognizedText }) => {
 const Feed = () => {
   const [sentence, setSentence] = useState("");
   const [recognizedText, setRecognizedText] = useState("");
+  const [totalScore, setTotalScore] = useState(0);
   const micScale = useRef(new Animated.Value(1)).current;
 
   const startPulsating = () => {
@@ -220,6 +254,12 @@ const Feed = () => {
 
   useEffect(() => {
     startPulsating();
+    const fetchTotalScore = async () => {
+      const totalScore = await getTotalScore();
+      setTotalScore(totalScore);
+      console.log("Total Score:", totalScore);
+    };
+    fetchTotalScore();
   }, []);
 
   const getSentence = async () => {
@@ -253,7 +293,7 @@ const Feed = () => {
             getSentence={getSentence}
             readSentence={readSentence}
           />
-          <FeedbackDisplay recognizedText={recognizedText} />
+          <FeedbackDisplay recognizedText={recognizedText} totalScore={totalScore} /> {/* Passer le score total */}
         </View>
       </ImageBackground>
     </View>
@@ -312,6 +352,11 @@ const styles = StyleSheet.create({
   scoreText: {
     fontSize: 18,
     color: "green",
+    marginTop: 10,
+  },
+  totalScoreText: {
+    fontSize: 18,
+    color: "blue",
     marginTop: 10,
   },
 });

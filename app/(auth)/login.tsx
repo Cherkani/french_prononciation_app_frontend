@@ -25,7 +25,7 @@ export default function Login() {
       setLoading(true);
       const { data, error } = await supabase
         .from("users")
-        .select("password")
+        .select("id, password")
         .eq("login", email)
         .single();
 
@@ -44,8 +44,8 @@ export default function Login() {
       }
 
       console.log("Login and password are correct");
-      await AsyncStorage.setItem("user", JSON.stringify({ email, password }));
-      signIn({ email, password });
+      await AsyncStorage.setItem("user", JSON.stringify({ email, password, userId: data.id }));
+      signIn({ email, password, userId: data.id });
       setAlertMessage("Login successful!");
       toggleAlert();
       router.push("/home"); // Assurez-vous que la navigation se fait ici
