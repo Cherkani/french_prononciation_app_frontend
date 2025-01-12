@@ -133,7 +133,7 @@ const RecordButton = ({ onRecognizedText }) => {
 };
 
 const FeedbackDisplay = ({ recognizedText }) => {
-  const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState([]);
   const [match, setMatch] = useState(false);
   const [score, setScore] = useState(0);
 
@@ -155,17 +155,20 @@ const FeedbackDisplay = ({ recognizedText }) => {
           document.getElementById("sentence").innerText
         ),
       });
-      setFeedback(response.data.feedback.join("\n"));
+      const feedbackArray = response.data.feedback.map((word) => ({
+        text: word.text,
+        correct: word.correct,
+      }));
+      setFeedback(feedbackArray);
       setMatch(response.data.match);
-      calculateScore(response.data.feedback);
+      calculateScore(feedbackArray);
     } catch (error) {
       console.error("Error comparing text:", error);
     }
   };
 
-  const calculateScore = (feedback) => {
-    const words = feedback.split(" ");
-    const correctWords = words.filter((word) => word === "correct").length;
+  const calculateScore = (feedbackArray) => {
+    const correctWords = feedbackArray.filter((word) => word.correct).length;
     setScore(correctWords);
   };
 
@@ -177,7 +180,17 @@ const FeedbackDisplay = ({ recognizedText }) => {
 
   return (
     <View style={styles.feedbackContainer}>
-      <Text style={styles.feedbackText}>{feedback}</Text>
+      <Text style={styles.recognizedText}>Phrase prononcée: {recognizedText}</Text>
+      <Text style={styles.feedbackText}>
+        {feedback.map((word, index) => (
+          <Text
+            key={index}
+            style={{ color: word.correct ? "green" : "red" }}
+          >
+            {word.text}{" "}
+          </Text>
+        ))}
+      </Text>
       <Text style={styles.scoreText}>Score: {score}</Text>
     </View>
   );
@@ -282,15 +295,19 @@ const styles = StyleSheet.create({
   },
   recordButtonContainer: {
     alignItems: "center",
-    margin: 20,
   },
   feedbackContainer: {
     alignItems: "center",
-    margin: 20,
+    marginTop: 20,
+  },
+  recognizedText: {
+    fontSize: 16,
+    color: "blue",
+    marginBottom: 10,
   },
   feedbackText: {
     fontSize: 16,
-    color: "#333",
+    color: "black",
   },
   scoreText: {
     fontSize: 18,
