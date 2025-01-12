@@ -53,7 +53,6 @@ def process_audio():
 
     # Check if audio_file and selected_sentence are present
     if not audio_file or not selected_sentence:
-        print("Missing audio file or selected sentence")
         return jsonify({"error": "Missing audio file or selected sentence"}), 400
 
     try:

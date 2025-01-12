@@ -19,7 +19,11 @@ def feedback():
     recognized_text = normalize_text(data.get('recognized_text', ""))
     reference_phrase = normalize_text(data.get('reference_phrase', ""))
 
+    print(f"Received recognized_text: {recognized_text}")
+    print(f"Received reference_phrase: {reference_phrase}")
+
     if not recognized_text or not reference_phrase:
+        print("Missing recognized text or reference phrase")
         return jsonify({"error": "Missing recognized text or reference phrase"}), 400
 
     # Word-by-word feedback
@@ -42,6 +46,7 @@ def feedback():
         feedback.append(f"Missing words: {' '.join(missing_words)}")
 
     match = recognized_text == reference_phrase
+    print(f"Feedback: {feedback}, Match: {match}")
     return jsonify({"match": match, "feedback": feedback})
 
 if __name__ == "__main__":

@@ -13,9 +13,9 @@ import axios from "axios";
 import { supabase } from "../../lib/supabase"; // Corriger le chemin de l'importation
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Importer AsyncStorage
 
-const SentenceDisplay = ({ sentence, getSentence, readSentence }) => (
+const SentenceDisplay = ({ sentence, getSentence, readSentence, sentenceRef }) => (
   <View style={styles.sentenceContainer}>
-    <Text id="sentence" style={styles.sentence}>
+    <Text ref={sentenceRef} style={styles.sentence}>
       {sentence || 'Cliquez sur "Obtenir une phrase" pour commencer'}
     </Text>
     <Button title="Obtenir une phrase" onPress={getSentence} />
@@ -23,7 +23,7 @@ const SentenceDisplay = ({ sentence, getSentence, readSentence }) => (
   </View>
 );
 
-const RecordButton = ({ onRecognizedText }) => {
+const RecordButton = ({ onRecognizedText, sentenceRef }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
   const mediaRecorderRef = useRef(null);
@@ -82,10 +82,13 @@ const RecordButton = ({ onRecognizedText }) => {
 
   const getFeedback = async (recognizedText) => {
     try {
-      const response = await axios.post("https://french-prononciation-app-backend-1.onrender.com/feedback", {
-        recognized_text: recognizedText,
-        reference_phrase: document.getElementById("sentence").innerText,
-      });
+      const response = await axios.post(
+        "https://french-prononciation-app-backend-1.onrender.com/feedback",
+        {
+          recognized_text: recognizedText,
+          reference_phrase: sentenceRef.current.innerText,
+        }
+      );
       console.log("Feedback:", response.data);
     } catch (error) {
       console.error("Error getting feedback:", error);
@@ -134,17 +137,48 @@ const RecordButton = ({ onRecognizedText }) => {
   );
 };
 
-const saveScore = async (score, sentenceLength) => {
-  try {
-    const user = JSON.parse(await AsyncStorage.getItem("user"));
-    const userId = user.userId;
-    const { error } = await supabase
-      .from("user_scores")
-      .insert([{ user_id: userId, score: score, sentence_length: sentenceLength }]);
-    if (error) throw error;
-  } catch (error) {
-    console.error("Error saving score:", error);
-  }
+const FeedbackDisplay = ({ recognizedText, sentenceRef }) => {
+  const [feedback, setFeedback] = useState("");
+  const [match, setMatch] = useState(false);
+
+  const normalizeText = (text) => {
+    return text
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+      .replace(/\s{2,}/g, " ")
+      .trim()
+      .toLowerCase();
+  };
+
+  const compareText = async () => {
+    try {
+      const response = await axios.post(
+        "https://french-prononciation-app-backend-1.onrender.com/feedback",
+        {
+          recognized_text: normalizeText(recognizedText),
+          reference_phrase: normalizeText(sentenceRef.current.innerText),
+        }
+      );
+      setFeedback(response.data.feedback.join("\n"));
+      setMatch(response.data.match);
+    } catch (error) {
+      console.error("Error comparing text:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (recognizedText) {
+      compareText();
+    }
+  }, [recognizedText]);
+
+  return (
+    <View style={styles.feedbackContainer}>
+      <Text style={styles.feedbackText}>{feedback}</Text>
+      {match && <Text style={styles.matchText}>Les phrases correspondent!</Text>}
+    </View>
+  );
 };
 
 const getTotalScore = async () => {
@@ -163,77 +197,12 @@ const getTotalScore = async () => {
   }
 };
 
-const FeedbackDisplay = ({ recognizedText, totalScore }) => {
-  const [feedback, setFeedback] = useState([]);
-  const [match, setMatch] = useState(false);
-  const [score, setScore] = useState(0);
-
-  const normalizeText = (text) => {
-    return text
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
-      .replace(/\s{2,}/g, " ")
-      .trim()
-      .toLowerCase();
-  };
-
-  const compareText = async () => {
-    try {
-      const response = await axios.post("https://french-prononciation-app-backend-1.onrender.com/feedback", {
-        recognized_text: normalizeText(recognizedText),
-        reference_phrase: normalizeText(
-          document.getElementById("sentence").innerText
-        ),
-      });
-      const feedbackArray = response.data.feedback.map((word) => ({
-        text: word.text,
-        correct: word.correct,
-      }));
-      setFeedback(feedbackArray);
-      setMatch(response.data.match);
-      calculateScore(feedbackArray);
-      await saveScore(score, document.getElementById("sentence").innerText.length);
-    } catch (error) {
-      console.error("Error comparing text:", error);
-    }
-  };
-
-  const calculateScore = (feedbackArray) => {
-    const correctWords = feedbackArray.filter((word) => word.correct).length;
-    setScore(correctWords);
-  };
-
-  useEffect(() => {
-    if (recognizedText) {
-      compareText();
-    }
-  }, [recognizedText]);
-
-  return (
-    <View style={styles.feedbackContainer}>
-      <Text style={styles.recognizedText}>Phrase prononcée: {recognizedText}</Text>
-      <Text style={styles.feedbackText}>
-        {feedback.map((word, index) => (
-          <Text
-            key={index}
-            style={{ color: word.correct ? "green" : "red" }}
-          >
-            {word.text}{" "}
-          </Text>
-        ))}
-      </Text>
-      <Text style={styles.scoreText}>Score: {score}</Text>
-      <Text style={styles.totalScoreText}>Total Score: {totalScore}</Text> {/* Afficher le score total */}
-    </View>
-  );
-};
-
 const Feed = () => {
   const [sentence, setSentence] = useState("");
   const [recognizedText, setRecognizedText] = useState("");
   const [totalScore, setTotalScore] = useState(0);
   const micScale = useRef(new Animated.Value(1)).current;
+  const sentenceRef = useRef(null);
 
   const startPulsating = () => {
     Animated.loop(
@@ -264,7 +233,9 @@ const Feed = () => {
 
   const getSentence = async () => {
     try {
-      const response = await axios.get("https://french-prononciation-app-backend-1.onrender.com/get_sentence");
+      const response = await axios.get(
+        "https://french-prononciation-app-backend-1.onrender.com/get_sentence"
+      );
       setSentence(response.data.sentence);
     } catch (error) {
       console.error("Error fetching sentence:", error);
@@ -287,13 +258,19 @@ const Feed = () => {
         imageStyle={{ opacity: 0.3 }}
       >
         <View style={styles.content}>
-          <RecordButton onRecognizedText={setRecognizedText} />
+          <RecordButton onRecognizedText={setRecognizedText} sentenceRef={sentenceRef} />
           <SentenceDisplay
             sentence={sentence}
             getSentence={getSentence}
             readSentence={readSentence}
+            sentenceRef={sentenceRef}
           />
-          <FeedbackDisplay recognizedText={recognizedText} totalScore={totalScore} /> {/* Passer le score total */}
+          <FeedbackDisplay
+            recognizedText={recognizedText}
+            totalScore={totalScore}
+            sentenceRef={sentenceRef}
+          />
+          <Text style={styles.totalScoreText}>Total Score: {totalScore}</Text> {/* Afficher le score total */}
         </View>
       </ImageBackground>
     </View>
@@ -335,22 +312,18 @@ const styles = StyleSheet.create({
   },
   recordButtonContainer: {
     alignItems: "center",
+    margin: 20,
   },
   feedbackContainer: {
     alignItems: "center",
-    marginTop: 20,
-  },
-  recognizedText: {
-    fontSize: 16,
-    color: "blue",
-    marginBottom: 10,
+    margin: 20,
   },
   feedbackText: {
     fontSize: 16,
-    color: "black",
+    color: "#333",
   },
-  scoreText: {
-    fontSize: 18,
+  matchText: {
+    fontSize: 16,
     color: "green",
     marginTop: 10,
   },
