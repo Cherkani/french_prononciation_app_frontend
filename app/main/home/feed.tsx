@@ -140,6 +140,7 @@ const RecordButton = ({ onRecognizedText, sentenceRef }) => {
 const FeedbackDisplay = ({ recognizedText, sentenceRef }) => {
   const [feedback, setFeedback] = useState("");
   const [match, setMatch] = useState(false);
+  const [score, setScore] = useState(0); // Ajouter l'état du score
 
   const normalizeText = (text) => {
     return text
@@ -162,6 +163,7 @@ const FeedbackDisplay = ({ recognizedText, sentenceRef }) => {
       );
       setFeedback(response.data.feedback.join("\n"));
       setMatch(response.data.match);
+      setScore(response.data.score); // Mettre à jour le score
     } catch (error) {
       console.error("Error comparing text:", error);
     }
@@ -177,6 +179,7 @@ const FeedbackDisplay = ({ recognizedText, sentenceRef }) => {
     <View style={styles.feedbackContainer}>
       <Text style={styles.feedbackText}>{feedback}</Text>
       {match && <Text style={styles.matchText}>Les phrases correspondent!</Text>}
+      <Text style={styles.scoreText}>Score: {score.toFixed(2)}%</Text> {/* Afficher le score */}
     </View>
   );
 };
@@ -330,6 +333,11 @@ const styles = StyleSheet.create({
   totalScoreText: {
     fontSize: 18,
     color: "blue",
+    marginTop: 10,
+  },
+  scoreText: {
+    fontSize: 16,
+    color: "purple",
     marginTop: 10,
   },
 });
