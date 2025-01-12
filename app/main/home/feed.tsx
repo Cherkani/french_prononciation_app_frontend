@@ -80,7 +80,7 @@ const RecordButton = ({ onRecognizedText }) => {
 
   const getFeedback = async (recognizedText) => {
     try {
-      const response = await axios.post("http://localhost:5003/feedback", {
+      const response = await axios.post("https://french-prononciation-app-backend-1.onrender.com:5003/feedback", {
         recognized_text: recognizedText,
         reference_phrase: document.getElementById("sentence").innerText,
       });
@@ -149,7 +149,7 @@ const FeedbackDisplay = ({ recognizedText }) => {
 
   const compareText = async () => {
     try {
-      const response = await axios.post("http://localhost:5003/feedback", {
+      const response = await axios.post("https://french-prononciation-app-backend-1.onrender.com:5003/feedback", {
         recognized_text: normalizeText(recognizedText),
         reference_phrase: normalizeText(
           document.getElementById("sentence").innerText
@@ -224,7 +224,7 @@ const Feed = () => {
 
   const getSentence = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/get_sentence");
+      const response = await axios.get("https://french-prononciation-app-backend-1.onrender.com:5000/get_sentence");
       setSentence(response.data.sentence);
     } catch (error) {
       console.error("Error fetching sentence:", error);
