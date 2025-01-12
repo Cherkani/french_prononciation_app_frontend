@@ -1,26 +1,24 @@
-import { useNavigation } from "@react-navigation/native";
-import { useHeaderHeight } from "@react-navigation/elements";
-import { useState } from "react";
-import {
-  Alert,
-  Button,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-import { supabase } from "../supabase/supabase";
-import { StyleSheet } from "react-native";
-const LoginScreen: React.FC = () => {
-  const navigation = useNavigation();
-  const height = useHeaderHeight();
+import { useRouter } from "expo-router";
+import { useState, useCallback } from "react";
+import { Pressable, StyleSheet, Text, View, Alert, TouchableOpacity } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { TextInput } from "react-native-gesture-handler";
+import { useAuth } from "../../context/auth";
+import { supabase } from "../lib/supabase";
+import { FancyAlert } from 'react-native-expo-fancy-alerts';
 
-  const [login, setLogin] = useState("");
+export default function Login() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
+  const [visible, setVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const toggleAlert = useCallback(() => {
+    setVisible(!visible);
+  }, [visible]);
 
   const onSignInTapped = async () => {
     try {
@@ -28,112 +26,129 @@ const LoginScreen: React.FC = () => {
       const { data, error } = await supabase
         .from("users")
         .select("password")
-        .eq("login", login)
+        .eq("login", email)
         .single();
 
       if (error || !data) {
         console.log("Login incorrect");
-        Alert.alert("Error", "Incorrect login or password");
+        setAlertMessage("Incorrect login or password");
+        toggleAlert();
         throw error || new Error("User not found");
       }
 
       if (password !== data.password) {
         console.log("Password incorrect");
-        Alert.alert("Error", "Incorrect login or password");
+        setAlertMessage("Incorrect login or password");
+        toggleAlert();
         throw new Error("Incorrect password");
       }
 
       console.log("Login and password are correct");
-      navigation.navigate("Home" as never);
+      await AsyncStorage.setItem("user", JSON.stringify({ email, password }));
+      signIn({ email, password });
+      setAlertMessage("Login successful!");
+      toggleAlert();
+      router.push("/home"); // Assurez-vous que la navigation se fait ici
     } catch (error) {
       console.log(error);
-      Alert.alert("Error", "Failed to fetch data. Please try again.");
+      setAlertMessage("Failed to fetch data. Please try again.");
+      toggleAlert();
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      keyboardVerticalOffset={height}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView contentContainerStyle={styles.scrollView}>
-        <View style={styles.innerContainer}>
-          <Text style={styles.title}>Sign in</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your login"
-            value={login}
-            onChangeText={setLogin}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
-          <Pressable onPress={() => navigation.navigate("ForgotPassword" as never)}>
-            <Text style={styles.link}>Forgot Password?</Text>
-          </Pressable>
-          <Button
-            title={loading ? "Loading..." : "Sign in"}
-            onPress={onSignInTapped}
-            disabled={loading}
-          />
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              Have an account?{" "}
-              <Pressable onPress={() => navigation.navigate("Register" as never)}>
-                <Text style={styles.link}>Sign up</Text>
-              </Pressable>
-            </Text>
-          </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    <View style={styles.container}>
+      <TextInput
+        style={styles.textInput}
+        value={email}
+        placeholder="Type email"
+        onChangeText={(text) => setEmail(text)}
+      />
+      <TextInput
+        style={styles.textInput}
+        value={password}
+        onChangeText={(text) => setPassword(text)}
+        placeholder="Type password"
+        secureTextEntry
+      />
+      <View style={styles.separator} />
+      <Pressable onPress={onSignInTapped} style={styles.button}>
+        <Text style={styles.text}>Login</Text>
+      </Pressable>
+      <Pressable onPress={() => router.push("/register")} style={styles.button}>
+        <Text style={styles.text}>Register</Text>
+      </Pressable>
+
+      <FancyAlert
+        visible={visible}
+        icon={<View style={styles.icon}><Text>🤓</Text></View>}
+        style={{ backgroundColor: 'white' }}
+      >
+        <Text style={{ marginTop: -16, marginBottom: 32 }}>{alertMessage}</Text>
+        <TouchableOpacity style={styles.btn} onPress={toggleAlert}>
+          <Text style={styles.btnText}>OK</Text>
+        </TouchableOpacity>
+      </FancyAlert>
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  scrollView: {
-    flexGrow: 1,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
   },
-  innerContainer: {
-    width: "80%",
+  separator: {
+    marginTop: 16,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 24,
-    textAlign: "center",
-  },
-  input: {
+  textInput: {
+    paddingHorizontal: 32,
+    paddingVertical: 16,
     borderWidth: 1,
     borderColor: "grey",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
-  link: {
-    color: "#05BFDB",
-    textAlign: "center",
     marginTop: 8,
+    width: "60%",
+    borderRadius: 32,
   },
-  footer: {
-    marginTop: 16,
+  text: {
+    color: "white",
+  },
+  button: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    width: "60%",
+    backgroundColor: "#05BFDB",
+    marginTop: 8,
+    borderRadius: 32,
     alignItems: "center",
   },
-  footerText: {
-    textAlign: "center",
+  icon: {
+    flex: 1,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'red',
+    borderRadius: 50,
+    width: '100%',
+  },
+  btn: {
+    borderRadius: 32,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    alignSelf: 'stretch',
+    backgroundColor: '#4CB748',
+    marginTop: 16,
+    minWidth: '50%',
+    paddingHorizontal: 16,
+  },
+  btnText: {
+    color: '#FFFFFF',
   },
 });
-
-export default LoginScreen;
