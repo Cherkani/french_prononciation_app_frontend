@@ -306,6 +306,7 @@ const Feed = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    transform: [{ scale: 0.7 }], 
   },
   background: {
     flex: 1,

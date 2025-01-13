@@ -2,7 +2,7 @@
   "expo": {
     "scheme": "acme",
     "web": {
-      "bundler": "metro"
+      "bundler": "webpack"
     },
     "name": "my-router-app",
     "slug": "my-router-app"
